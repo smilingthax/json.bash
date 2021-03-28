@@ -1,0 +1,48 @@
+#!/bin/bash
+
+. json_lib.sh
+
+out_echo() { # type raw [parsed...]
+#  echo "$1 $2"
+#  echo "$2"
+  echo "$1 ${@:3}"
+#  echo "$@"
+}
+
+_out_first=1
+out_dense() {
+  [[ $1 != [OA] ]] && (( !_out_first )) && echo -n ","
+  case "$1" in
+  k) echo -n "$2:"; _out_first=1 ;;
+  [oa]) echo -n "$2"; _out_first=1 ;;
+  *) echo -n "$2"; _out_first=0 ;;
+  esac
+}
+
+_out_indent=   # $'\n'
+out_pretty() {
+  if [[ $1 == [OA] ]]; then
+    _out_indent=${_out_indent%??}
+    (( !_out_first )) && echo
+  else
+    (( !_out_first )) && echo ","
+  fi
+  (( _out_first != 2 )) && echo -n "$_out_indent"
+  case "$1" in
+  k) echo -n "$2: "; _out_first=2 ;;
+  [oa]) echo "$2"; _out_first=1; _out_indent+='  '; ;;
+  *) echo -n "$2"; _out_first=0 ;;
+  esac
+}
+
+#echo $' [ "bad\nnewline", "bad\ttab" ]' | _jsonparse out_echo
+#echo -n $' [ "' | _jsonparse out_echo
+
+#echo $' [ \ntrue\r,\t false, "\x7fstör\\t\\\\ling\\"end\\u2620e", null, -0.33, 1, 4.5e-3, 6E3, 2.2e+3, { "ko": "a" }, {}] ' | _jsonparse out_echo
+#echo $' [ \ntrue\r,\t false, "\x7fstör\\t\\\\ling\\"end\\u2620e", null, -0.33, 1, 4.5e-3, 6E3, 2.2e+3, { "ko": "a" }, {}] ' | _jsonparse out_dense
+#echo $' [ \ntrue\r,\t false, "\x7fstör\\t\\\\ling\\"end\\u2620e", null, -0.33, 1, 4.5e-3, 6E3, 2.2e+3, { "ko": "a" }, {}] ' | _jsonparse out_pretty
+
+#_jsonparse out_dense 1
+#_jsonparse out_echo
+_jsonparse out_pretty
+
